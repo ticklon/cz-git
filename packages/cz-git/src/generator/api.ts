@@ -50,9 +50,9 @@ export async function fetchOpenAIMessage(options: CommitizenGitOptions, prompt: 
             .map((r: any) => parseAISubject(options, aiContext.parseFn(r)))
     }
     catch (err: any) {
-        let errorMsg = 'Fetch OpenAI API message failure'
+        let errorMsg = 'Fetch OpenAI API message failure.'
         if (err instanceof APIError) {
-            errorMsg += `The response HTTP Code: ${err.code}`
+            errorMsg += ` The response HTTP Code: ${err.code}`
             if (err.code === 500)
                 errorMsg += '; Check the API status: https://status.openai.com'
         }
