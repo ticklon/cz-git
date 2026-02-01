@@ -9,6 +9,7 @@ export type CzgitFlagList =
     | 'alias'
     | 'ai-num'
     | 'ai-model'
+    | 'ai-type'
     | 'openai-token'
     | 'api-key'
     | 'api-model'
@@ -37,6 +38,8 @@ export interface CzgitFlag {
     'ai-num'?: string
     /** option: --ai-model="xxx" */
     'ai-model'?: string
+    /** option: --ai-type="xxx" */
+    'ai-type'?: string
     /** option: --api-key="xxx" */
     'api-key'?: string
     /** option: --api-model="xxx" */

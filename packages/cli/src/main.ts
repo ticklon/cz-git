@@ -37,6 +37,7 @@ export function main(environment: any = {}, argv = process.argv) {
             'api-proxy': apiProxy,
             'api-endpoint': apiEndpoint,
             'unset-proxy': unsetProxy,
+            'ai-type': aiType,
         } = parsedArgs.czgitArgs?.flag
 
         if (printHelp) {
@@ -46,8 +47,8 @@ export function main(environment: any = {}, argv = process.argv) {
             console.log(czgitVersion)
             process.exit(0)
         }
-        else if (openAIAPIKey || openAIToken || apiProxy || unsetProxy || apiEndpoint || apiModel) {
-            setupAIConfig(openAIAPIKey || openAIToken, apiProxy, unsetProxy, apiEndpoint, apiModel)
+        else if (openAIAPIKey || openAIToken || apiProxy || unsetProxy || apiEndpoint || apiModel || aiType) {
+            setupAIConfig(openAIAPIKey || openAIToken, apiProxy, unsetProxy, apiEndpoint, apiModel, aiType)
             process.exit(0)
         }
     }

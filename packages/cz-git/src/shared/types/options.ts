@@ -235,6 +235,13 @@ export interface CommitizenGitOptions {
     useAI?: boolean
 
     /**
+     * Select the AI type
+     *
+     * @default "openai"
+     */
+    aiType?: 'openai' | 'gemini'
+
+    /**
      * Choose the AI model you want to use
      *
      * @see https://platform.openai.com/docs/models/model-endpoint-compatibility => /v1/chat/completions
@@ -263,6 +270,12 @@ export interface CommitizenGitOptions {
      * `npx czg --api-key=sk-xxxxx`
      */
     openAIToken?: string
+
+    /**
+     * Save on "$HOME/.config/.czrc" or "$HOME/.czrc". Do not save on project.
+     * `npx czg --api-key=AIzaSy...`
+     */
+    geminiToken?: string
 
     /**
      * `npx czg --api-model=<model>` - to setup the AI model in local
@@ -638,10 +651,12 @@ export const defaultConfig = Object.freeze({
     themeColorCode: '',
     useEmoji: false,
     useAI: false,
+    aiType: 'openai',
     aiModel: 'gpt-4o-mini',
     aiNumber: 1,
     aiQuestionCB: undefined,
     openAIToken: '',
+    geminiToken: '',
     apiProxy: '',
     apiEndpoint: 'https://api.openai.com/v1',
     emojiAlign: 'center',

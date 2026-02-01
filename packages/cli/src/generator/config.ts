@@ -4,24 +4,40 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { style } from 'cz-git'
 
-export function setupAIConfig(token?: string, apiProxy?: string, unsetProxy?: boolean, apiEndpoint?: string, apiModel?: string) {
+export function setupAIConfig(token?: string, apiProxy?: string, unsetProxy?: boolean, apiEndpoint?: string, apiModel?: string, aiType?: string) {
     const configDir = path.join(homedir(), '.config')
     const configFile = path.join(configDir, '.czrc')
     try {
         if (!existsSync(configDir))
             mkdirSync(configDir, { recursive: true })
 
-        const config = { openAIToken: token, apiProxy, apiEndpoint, apiModel }
+        const updateConfig: any = {
+            apiProxy,
+            apiEndpoint,
+            apiModel,
+            aiType,
+        }
+        if (token) {
+            if (aiType === 'gemini') {
+                updateConfig.geminiToken = token
+            }
+            else {
+                updateConfig.openAIToken = token
+            }
+        }
+
         if (!existsSync(configFile)) {
-            writeFileSync(configFile, JSON.stringify(config), 'utf8')
+            writeFileSync(configFile, JSON.stringify(updateConfig), 'utf8')
         }
         else {
-            const originConfig: typeof config = JSON.parse(readFileSync(configFile, 'utf8'))
+            const originConfig: any = JSON.parse(readFileSync(configFile, 'utf8'))
             const result = {
-                openAIToken: config.openAIToken || originConfig.openAIToken,
-                apiProxy: config.apiProxy || originConfig.apiProxy,
-                apiEndpoint: config.apiEndpoint || originConfig.apiEndpoint,
-                apiModel: config.apiModel || originConfig.apiModel,
+                openAIToken: updateConfig.openAIToken || originConfig.openAIToken,
+                geminiToken: updateConfig.geminiToken || originConfig.geminiToken,
+                apiProxy: updateConfig.apiProxy || originConfig.apiProxy,
+                apiEndpoint: updateConfig.apiEndpoint || originConfig.apiEndpoint,
+                apiModel: updateConfig.apiModel || originConfig.apiModel,
+                aiType: updateConfig.aiType || originConfig.aiType,
             }
             if (unsetProxy)
                 delete result?.apiProxy
@@ -29,9 +45,9 @@ export function setupAIConfig(token?: string, apiProxy?: string, unsetProxy?: bo
         }
     }
     catch (e) {
-        console.log(style.red('>>> Setup OpenAI API key failure. The sugguestion save $HOME/.czrc or $HOME/.config/.czrc as json format with "openAIToken" field'))
+        console.log(style.red('>>> Setup AI config failure. The sugguestion save $HOME/.czrc or $HOME/.config/.czrc as json format'))
         console.error(e)
         process.exit(1)
     }
-    console.log(style.green('>>> Setup OpenAI API key on'), style.underline(style.yellow(configFile)), style.green('successfully'))
+    console.log(style.green('>>> Setup AI config on'), style.underline(style.yellow(configFile)), style.green('successfully'))
 }

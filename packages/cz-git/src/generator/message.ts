@@ -17,7 +17,7 @@ import {
     wrap,
 } from '../shared'
 import type { Answers, CommitizenGitOptions, GenerateAIPromptType } from '../shared'
-import { fetchOpenAIMessage } from './api'
+import { fetchAIMessage } from './api'
 
 /** @get if using alias return alias message */
 export function getAliasMessage(config: CommitizenGitOptions, alias?: string) {
@@ -233,6 +233,6 @@ export async function generateAISubjects(
             diff,
         })
     }
-    return await fetchOpenAIMessage(options, prompt)
+    return await fetchAIMessage(options, prompt)
 }
 // #endregion

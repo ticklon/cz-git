@@ -5,6 +5,13 @@ import HttpsProxyAgent from 'https-proxy-agent'
 import { isNodeVersionInRange, log, transformSubjectCase } from '../shared'
 import type { CommitizenGitOptions } from '../shared'
 
+export async function fetchAIMessage(options: CommitizenGitOptions, prompt: string) {
+    if (options.aiType === 'gemini') {
+        return fetchGeminiMessage(options, prompt)
+    }
+    return fetchOpenAIMessage(options, prompt)
+}
+
 export async function fetchOpenAIMessage(options: CommitizenGitOptions, prompt: string) {
     if (!options.openAIToken) {
         log('err', `Not Found OpenAI API Key, Please use setup command ${style.cyan('`npx -y czg --api-key="sk-XXXX"`')}`)
@@ -105,5 +112,70 @@ class APIError extends Error {
         super(message)
         this.name = 'APIError'
         this.code = code
+    }
+}
+
+export async function fetchGeminiMessage(options: CommitizenGitOptions, prompt: string) {
+    if (!options.geminiToken) {
+        log('err', `Not Found Gemini API Key, Please use setup command ${style.cyan('`npx -y czg --api-key="AIzaSy..."`')}`)
+        throw new Error('See guide page: https://cz-git.qbb.sh/recipes/openai#setup-openai-token')
+    }
+
+    const httpProxy = options.apiProxy || process.env.https_proxy || process.env.all_proxy || process.env.ALL_PROXY || process.env.http_proxy
+    let agent: any
+    if (httpProxy) {
+        // eslint-disable-next-line node/no-deprecated-api
+        const proxyUrl = url?.parse(httpProxy) || new url.URL(httpProxy)
+        // @ts-expect-error
+        agent = new HttpsProxyAgent(proxyUrl)
+        agent.path = agent?.pathname
+    }
+
+    const model = options.aiModel || 'gemini-1.5-flash'
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${options.geminiToken}`
+
+    try {
+        const { default: fetch } = await import('node-fetch-cjs')
+        const response = await fetch(apiUrl, {
+            agent,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }],
+            }),
+            signal: isNodeVersionInRange(18) ? AbortSignal?.timeout(10 * 1000) : undefined,
+        })
+
+        if (
+            !response.status
+            || response.status < 200
+            || response.status > 299
+        ) {
+            const errorJson: any = await response.json()
+            throw new APIError(errorJson?.error?.message, response.status)
+        }
+        const json: any = await response.json()
+        return json
+            .candidates
+            .map((c: any) => parseAISubject(options, c.content.parts[0].text))
+    }
+    catch (err: any) {
+        let errorMsg = 'Fetch Gemini API message failure.'
+        if (err instanceof APIError) {
+            errorMsg += ` The response HTTP Code: ${err.code}`
+        }
+
+        if (err.type === 'request-timeout')
+            errorMsg += `. ${style.bold(style.underline('Request Timeout'))}`
+
+        if (!isNodeVersionInRange(16, 5))
+            errorMsg = 'Node.js version >= v16.5.0 is required'
+
+        log('err', errorMsg)
+        throw new Error(err.message)
     }
 }

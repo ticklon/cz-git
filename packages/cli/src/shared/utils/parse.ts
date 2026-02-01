@@ -112,6 +112,7 @@ export function resovleArgs(argv: string[]): CzgitParseArgs {
     result = resovleFlag(parseArgv, 'y', 'yes', result)
     result = resovleFlag(parseArgv, 'N', 'ai-num', result)
     result = resovleFlag(parseArgv, 'M', 'ai-model', result)
+    result = resovleFlag(parseArgv, 'ai-type', 'ai-type', result)
     result = resovleFlag(parseArgv, 'openai-token', 'openai-token', result) // @deprecated => api-key
     result = resovleFlag(parseArgv, 'api-key', 'api-key', result)
     result = resovleFlag(parseArgv, 'api-model', 'api-model', result)
